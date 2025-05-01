@@ -6,13 +6,14 @@ document.addEventListener('DOMContentLoaded',() => {
     });
 
     document.getElementById('summarizeBtn').addEventListener('click',summarizeText);
+    document.getElementById('suggestBtn').addEventListener('click',suggestMe);
+    document.getElementById('askBtn').addEventListener('click',askMe);
     document.getElementById('saveNotesBtn').addEventListener('click',saveNotes);
 
 
 });
 
 async function summarizeText(){
-    
 
     try{
         const [tab] = await chrome.tabs.query({active:true,currentWindow:true}) 
@@ -42,6 +43,70 @@ async function summarizeText(){
     }
 
 }
+
+async function suggestMe(){
+    try{
+        const [tab] = await chrome.tabs.query({active:true,currentWindow:true}) 
+        const [{result}] = await chrome.scripting.executeScript({
+            target:{tabId: tab.id},
+            function : () => window.getSelection().toString()
+        });
+        if(!result){
+            showResult('PLease select some Text first');
+            return;
+        }
+        const response = await fetch('http://localhost:8080/api/research/process',{
+            method:'POST',
+            headers :{'Content-Type':'application/json'},
+            body: JSON.stringify({content:result,operation:'suggest'})
+
+        });
+        if(!response.ok){
+            throw new Error('API ERROR :${response.status}');
+
+        }
+        const text = await response.text();
+        showResult(text.replace(/\n/g,'<br>'));
+
+    }catch (error){
+        showResult('Error:' + error.message);
+    }
+
+
+}
+
+async function askMe(){
+    try{
+        const [tab] = await chrome.tabs.query({active:true,currentWindow:true}) 
+        const [{result}] = await chrome.scripting.executeScript({
+            target:{tabId: tab.id},
+            function : () => window.getSelection().toString()
+        });
+        if(!result){
+            showResult('PLease select some Text first');
+            return;
+        }
+        const response = await fetch('http://localhost:8080/api/research/process',{
+            method:'POST',
+            headers :{'Content-Type':'application/json'},
+            body: JSON.stringify({content:result,operation:'Ask me Questions'})
+
+        });
+        if(!response.ok){
+            throw new Error('API ERROR :${response.status}');
+
+        }
+        const text = await response.text();
+        showResult(text.replace(/\n/g,'<br>'));
+
+    }catch (error){
+        showResult('Error:' + error.message);
+    }
+
+
+}
+
+
 
 async function saveNotes(){
     

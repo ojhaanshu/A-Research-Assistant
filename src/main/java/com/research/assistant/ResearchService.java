@@ -81,6 +81,9 @@ public class ResearchService {
 		case "suggest":
 			prompt.append("Based on a following content:suggest related topics and further reading. Format the response with clear headings and bullet points:\n\n ");
 		    break;
+		case "Ask me Questions":
+			prompt.append("Based on a following content: Ask me multiple questions of each of the 3 levels Easy,Intermediate,Hard . Keep the questions clear and short:\n\n");
+			break;
 		default:
 			throw new IllegalArgumentException( "Unknown Operation: " +  request.getOperation());
 		}
